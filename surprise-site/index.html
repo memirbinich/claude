@@ -1,0 +1,911 @@
+<title>Sana Bir Şey Bıraktım</title>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   BURAYI DÜZENLE — başka hiçbir yere dokunmana gerek yok
+   ═══════════════════════════════════════════════════════════════ */
+const CONFIG = {
+
+  // ── ŞİFRE ─────────────────────────────────────────────────────
+  // 4 haneli olmalı. Anlamlı bir sayı seç: tanışma tarihiniz,
+  // doğum günü, ilk buluşma... Aşağıdaki ipucu onu çağrıştırsın.
+  sifre: "1408",
+  ipucu: "seni ilk gördüğüm gün",
+
+  // ── KİME ──────────────────────────────────────────────────────
+  isim: "Elif",
+
+  // ── MEKTUP ────────────────────────────────────────────────────
+  // Her satır ayrı paragraf olur. İstediğin kadar ekle/çıkar.
+  mektup: [
+    "Bugün yanında olamıyorum. Ama bu sayfayı hazırlarken üç saat boyunca aklımda sadece sen vardın, bu da bir şeydir herhalde.",
+    "Sana söylemeyi hep unuttuğum bir şey var: en sevdiğim anımız o meşhur akşam değil. Mutfakta, sen bir şey anlatırken benim seni dinlemeyi bırakıp sadece izlediğim o sıradan salı akşamı.",
+    "Nereye gidersen git, burada bir yerde bu sayfa duruyor olacak. Canın sıkıldığında şifreyi hatırla, yeter."
+  ],
+  imza: "— hep buradayım",
+
+  // ── ŞARKI ─────────────────────────────────────────────────────
+  sarkiAdi: "Bizim Şarkı",
+  sanatci: "o gece çalan",
+  // Sözlerden 2–3 satır. Ekranda tek tek belirir.
+  sozler: [
+    "ve sen gülünce",
+    "bütün şehir bir anlığına sustu"
+  ],
+  sarkiSuresi: 214, // saniye — ilerleme çubuğunun hızı için
+
+  // ── FOTOĞRAF (opsiyonel) ──────────────────────────────────────
+  // Buraya fotoğrafın base64 data URI'sini yapıştır:
+  //   "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
+  // Boş bırakırsan çizilmiş bir çerçeve görünür.
+  // NOT: dışarıdan link (https://...) çalışmaz, güvenlik kuralı engelliyor.
+  foto: "",
+
+  // ── SON SÖZ ───────────────────────────────────────────────────
+  sonSoz: "iyi ki varsın"
+};
+/* ═══════════════════════════════════════════════════════════════
+   DÜZENLENECEK KISIM BİTTİ
+   ═══════════════════════════════════════════════════════════════ */
+</script>
+
+<style>
+  /* ── Tokenlar ─────────────────────────────────────────────── */
+  :root {
+    --ink:        #3B2A33;
+    --ink-soft:   #7A626D;
+    --paper:      #FBF3F4;
+    --raised:     #FFFFFF;
+    --rose:       #D4547A;
+    --rose-deep:  #A83A5B;
+    --sage:       #7A9E7E;
+    --gold:       #C9A227;
+    --rule:       rgba(59, 42, 51, .11);
+    --shadow:     0 1px 2px rgba(59,42,51,.05), 0 12px 32px -12px rgba(59,42,51,.18);
+    --shadow-lift:0 2px 4px rgba(59,42,51,.06), 0 28px 60px -20px rgba(59,42,51,.28);
+
+    --f-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --f-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    --step--1: .8125rem;
+    --step-0:  1rem;
+    --step-1:  1.125rem;
+    --step-2:  clamp(1.25rem, 1.1rem + .7vw, 1.5rem);
+    --step-3:  clamp(1.6rem, 1.3rem + 1.4vw, 2.1rem);
+    --step-4:  clamp(2.2rem, 1.5rem + 3.2vw, 3.6rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink:        #F2E4E9;
+      --ink-soft:   #AC93A0;
+      --paper:      #191219;
+      --raised:     #241A21;
+      --rose:       #E87A9C;
+      --rose-deep:  #F3A6BC;
+      --sage:       #8FB394;
+      --gold:       #D9B84A;
+      --rule:       rgba(242, 228, 233, .13);
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.6);
+      --shadow-lift:0 2px 4px rgba(0,0,0,.45), 0 28px 60px -20px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink:        #F2E4E9;
+    --ink-soft:   #AC93A0;
+    --paper:      #191219;
+    --raised:     #241A21;
+    --rose:       #E87A9C;
+    --rose-deep:  #F3A6BC;
+    --sage:       #8FB394;
+    --gold:       #D9B84A;
+    --rule:       rgba(242, 228, 233, .13);
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.6);
+    --shadow-lift:0 2px 4px rgba(0,0,0,.45), 0 28px 60px -20px rgba(0,0,0,.7);
+  }
+  :root[data-theme="light"] {
+    --ink:        #3B2A33;
+    --ink-soft:   #7A626D;
+    --paper:      #FBF3F4;
+    --raised:     #FFFFFF;
+    --rose:       #D4547A;
+    --rose-deep:  #A83A5B;
+    --sage:       #7A9E7E;
+    --gold:       #C9A227;
+    --rule:       rgba(59, 42, 51, .11);
+    --shadow:     0 1px 2px rgba(59,42,51,.05), 0 12px 32px -12px rgba(59,42,51,.18);
+    --shadow-lift:0 2px 4px rgba(59,42,51,.06), 0 28px 60px -20px rgba(59,42,51,.28);
+  }
+
+  /* ── Zemin ────────────────────────────────────────────────── */
+  .stage {
+    min-height: 100svh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: var(--step-0);
+    line-height: 1.6;
+    position: relative;
+    overflow-x: hidden;
+    display: grid;
+  }
+  .stage::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 0%,  color-mix(in srgb, var(--rose) 12%, transparent), transparent 70%),
+      radial-gradient(ellipse 50% 45% at 88% 100%, color-mix(in srgb, var(--sage) 10%, transparent), transparent 70%);
+    z-index: 0;
+  }
+
+  #petals {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity .9s ease;
+  }
+  #petals.on { opacity: 1; }
+
+  /* ── Sahne yönetimi ───────────────────────────────────────── */
+  .screen {
+    grid-area: 1 / 1;
+    display: none;
+    place-items: center;
+    padding: clamp(1.25rem, 4vw, 3rem);
+    position: relative;
+    z-index: 2;
+  }
+  .screen.is-active {
+    display: grid;
+    animation: rise .7s cubic-bezier(.2,.7,.3,1) both;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* ── Ortak ────────────────────────────────────────────────── */
+  .eyebrow {
+    font-size: var(--step--1);
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .display {
+    font-family: var(--f-display);
+    font-weight: 400;
+    line-height: 1.1;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  .btn {
+    font-family: var(--f-body);
+    font-size: var(--step-0);
+    font-weight: 500;
+    letter-spacing: .01em;
+    color: var(--paper);
+    background: var(--rose);
+    border: none;
+    border-radius: 999px;
+    padding: .8rem 2rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform .18s cubic-bezier(.2,.7,.3,1), background .18s ease, box-shadow .18s ease;
+  }
+  .btn:hover { background: var(--rose-deep); transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-quiet {
+    font-family: var(--f-body);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: .5rem .75rem;
+    border-radius: 999px;
+    transition: color .18s ease, background .18s ease;
+  }
+  .btn-quiet:hover { color: var(--rose); background: color-mix(in srgb, var(--rose) 9%, transparent); }
+
+  :where(button, [tabindex]):focus-visible {
+    outline: 2px solid var(--rose);
+    outline-offset: 3px;
+  }
+
+  /* ── 1 · Kilit ────────────────────────────────────────────── */
+  .lock {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+    width: min(880px, 100%);
+    background: var(--raised);
+    border-radius: 26px;
+    box-shadow: var(--shadow-lift);
+    padding: clamp(1.75rem, 4vw, 3rem);
+    position: relative;
+    overflow: hidden;
+  }
+  .lock::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 1px solid var(--rule);
+    border-radius: 18px;
+    pointer-events: none;
+  }
+  @media (min-width: 720px) {
+    .lock { grid-template-columns: 1fr 1fr; }
+  }
+
+  .lock__art { display: grid; justify-items: center; gap: 1rem; text-align: center; }
+  .lock__hint {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: var(--step-1);
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 24ch;
+  }
+  .lock__hint b { color: var(--rose); font-style: normal; font-weight: 500; }
+
+  .lock__pad { display: grid; gap: 1.15rem; justify-items: center; }
+
+  .dots { display: flex; gap: .7rem; }
+  .dot {
+    width: 2.6rem; height: 3.1rem;
+    border-radius: 10px;
+    border: 1.5px solid var(--rule);
+    background: color-mix(in srgb, var(--rose) 4%, transparent);
+    display: grid; place-items: center;
+    font-family: var(--f-display);
+    font-size: var(--step-2);
+    color: var(--rose);
+    transition: border-color .2s ease, transform .2s cubic-bezier(.2,.7,.3,1), background .2s ease;
+  }
+  .dot.filled {
+    border-color: var(--rose);
+    background: color-mix(in srgb, var(--rose) 11%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .55rem;
+    width: min(280px, 100%);
+  }
+  .key {
+    font-family: var(--f-body);
+    font-size: var(--step-2);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 4%, transparent);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    aspect-ratio: 1.35;
+    cursor: pointer;
+    transition: background .15s ease, transform .12s cubic-bezier(.2,.7,.3,1), color .15s ease;
+  }
+  .key:hover { background: color-mix(in srgb, var(--rose) 12%, transparent); color: var(--rose-deep); }
+  .key:active { transform: scale(.94); }
+  .key--wide { grid-column: span 1; font-size: var(--step-1); color: var(--ink-soft); }
+
+  .lock__msg {
+    font-size: var(--step--1);
+    min-height: 1.4em;
+    margin: 0;
+    color: var(--rose-deep);
+    letter-spacing: .02em;
+  }
+
+  .shake { animation: shake .42s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes shake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(4px); }
+    30%, 50%, 70% { transform: translateX(-7px); }
+    40%, 60% { transform: translateX(7px); }
+  }
+
+  /* ── Maskot ───────────────────────────────────────────────── */
+  .mascot { width: clamp(140px, 30vw, 200px); height: auto; overflow: visible; }
+  .mascot .m-body { fill: var(--gold); }
+  .mascot .m-shade { fill: rgba(0,0,0,.07); }
+  .mascot .m-face { fill: var(--ink); }
+  .mascot .m-blush { fill: var(--rose); opacity: .5; }
+  .mascot .m-eyes-sad,
+  .mascot .m-eyes-happy,
+  .mascot .m-tear { display: none; }
+  .mascot.is-sad .m-eyes-idle,
+  .mascot.is-happy .m-eyes-idle { display: none; }
+  .mascot.is-sad .m-eyes-sad,
+  .mascot.is-sad .m-tear { display: block; }
+  .mascot.is-happy .m-eyes-happy { display: block; }
+  .mascot.is-happy { animation: hop .55s cubic-bezier(.3,1.4,.5,1) 2; }
+  @keyframes hop {
+    0%, 100% { transform: translateY(0) scale(1, 1); }
+    35%      { transform: translateY(-14px) scale(.97, 1.04); }
+    70%      { transform: translateY(0) scale(1.03, .96); }
+  }
+
+  /* ── 2 · Sürpriz ──────────────────────────────────────────── */
+  .reveal { display: grid; justify-items: center; gap: 1.5rem; text-align: center; }
+  .reveal__title {
+    font-size: var(--step-4);
+    letter-spacing: -.015em;
+  }
+  .reveal__title em {
+    font-style: italic;
+    color: var(--rose);
+  }
+  .reveal__sub { color: var(--ink-soft); margin: 0; max-width: 34ch; }
+
+  /* ── 3 · Mektup ───────────────────────────────────────────── */
+  .letter {
+    width: min(620px, 100%);
+    background: var(--raised);
+    border-radius: 4px 4px 18px 18px;
+    box-shadow: var(--shadow-lift);
+    padding: clamp(2rem, 5vw, 3.5rem) clamp(1.5rem, 5vw, 3.25rem) clamp(1.75rem, 4vw, 2.5rem);
+    position: relative;
+    /* çizgili defter kâğıdı */
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(1.9em - 1px),
+      var(--rule) calc(1.9em - 1px),
+      var(--rule) 1.9em
+    );
+    background-position: 0 clamp(2rem, 5vw, 3.5rem);
+    transform: rotate(-.5deg);
+  }
+  .letter__inner { position: relative; z-index: 1; }
+  .letter__to {
+    font-family: var(--f-display);
+    font-size: var(--step-3);
+    color: var(--rose);
+    margin: 0 0 1.9em;
+    line-height: 1.9em;
+  }
+  .letter p.line {
+    font-family: var(--f-display);
+    font-size: var(--step-1);
+    line-height: 1.9em;
+    margin: 0 0 1.9em;
+    color: var(--ink);
+  }
+  .letter__sign {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: var(--step-1);
+    color: var(--ink-soft);
+    text-align: right;
+    margin: 0;
+    line-height: 1.9em;
+  }
+  .bloom {
+    position: absolute;
+    width: clamp(70px, 16vw, 118px);
+    opacity: .5;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bloom--tl { top: -14px;  left: -18px;  transform: rotate(-24deg); }
+  .bloom--br { bottom: -20px; right: -14px; transform: rotate(152deg); }
+  .bloom .petal { fill: var(--rose); }
+  .bloom .petal-2 { fill: var(--rose); opacity: .55; }
+  .bloom .leaf  { fill: var(--sage); }
+  .bloom .core  { fill: var(--gold); }
+
+  /* ── 4 · Şarkı ────────────────────────────────────────────── */
+  .song {
+    width: min(440px, 100%);
+    display: grid;
+    gap: 1.5rem;
+    justify-items: center;
+  }
+  .frame {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--rose) 8%, var(--raised));
+    background-size: cover;
+    background-position: center;
+    box-shadow: var(--shadow-lift);
+    display: grid;
+    place-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .frame__ph {
+    display: grid;
+    justify-items: center;
+    gap: .6rem;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+    text-align: center;
+    padding: 1.5rem;
+  }
+  .frame.has-photo .frame__ph { display: none; }
+  .frame__lyrics {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 2.5rem 1.5rem 1.4rem;
+    display: grid;
+    gap: .3rem;
+    text-align: center;
+  }
+  .frame.has-photo .frame__lyrics {
+    background: linear-gradient(to top, rgba(0,0,0,.62), transparent);
+  }
+  .lyric {
+    font-family: var(--f-display);
+    font-size: var(--step-1);
+    line-height: 1.4;
+    margin: 0;
+    color: var(--ink);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.3,1);
+  }
+  .frame.has-photo .lyric { color: #fff; text-shadow: 0 1px 12px rgba(0,0,0,.5); }
+  .lyric.in { opacity: 1; transform: none; }
+
+  .player { width: 100%; display: grid; gap: .7rem; }
+  .player__meta { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+  .player__name { font-family: var(--f-display); font-size: var(--step-1); margin: 0; }
+  .player__by   { font-size: var(--step--1); color: var(--ink-soft); margin: 0; }
+  .track {
+    height: 4px;
+    border-radius: 99px;
+    background: var(--rule);
+    overflow: hidden;
+  }
+  .track__fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 99px;
+    background: var(--rose);
+    transition: width .25s linear;
+  }
+  .player__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .time { font-size: var(--step--1); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .playbtn {
+    width: 2.75rem; height: 2.75rem;
+    border-radius: 50%;
+    border: none;
+    background: var(--rose);
+    color: var(--paper);
+    display: grid; place-items: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform .18s cubic-bezier(.2,.7,.3,1), background .18s ease;
+  }
+  .playbtn:hover { background: var(--rose-deep); transform: scale(1.06); }
+  .playbtn svg { width: 1.05rem; height: 1.05rem; fill: currentColor; }
+  .playbtn .ico-pause { display: none; }
+  .playbtn.playing .ico-play  { display: none; }
+  .playbtn.playing .ico-pause { display: block; }
+
+  /* ── 5 · Kalp ─────────────────────────────────────────────── */
+  .finale { display: grid; justify-items: center; gap: 1.75rem; text-align: center; }
+  .heart { width: clamp(150px, 34vw, 240px); height: auto; }
+  .heart path { fill: var(--rose); }
+  .heart { animation: beat 2.4s ease-in-out infinite; transform-origin: center; }
+  @keyframes beat {
+    0%, 100%   { transform: scale(1); }
+    12%        { transform: scale(1.07); }
+    24%        { transform: scale(1); }
+    36%        { transform: scale(1.045); }
+    48%        { transform: scale(1); }
+  }
+  .finale__word {
+    font-size: var(--step-3);
+    font-style: italic;
+    color: var(--ink);
+  }
+
+  .nav { display: flex; gap: .4rem; align-items: center; justify-content: center; margin-top: .5rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+    }
+  }
+</style>
+
+<div class="stage">
+  <canvas id="petals" aria-hidden="true"></canvas>
+
+  <!-- ═══ 1 · KİLİT ═══ -->
+  <section class="screen screen--lock is-active" id="s-lock">
+    <div class="lock" id="lockCard">
+      <div class="lock__art">
+        <svg class="mascot" id="mascot" viewBox="0 0 200 210" role="img" aria-label="Küçük bir bekçi">
+          <ellipse class="m-shade" cx="100" cy="197" rx="52" ry="8"/>
+          <path class="m-body" d="M100 14c-42 0-70 34-70 84 0 56 30 88 70 88s70-32 70-88c0-50-28-84-70-84z"/>
+          <circle class="m-blush" cx="56" cy="112" r="11"/>
+          <circle class="m-blush" cx="144" cy="112" r="11"/>
+          <g class="m-eyes-idle">
+            <circle class="m-face" cx="76" cy="97" r="6.5"/>
+            <circle class="m-face" cx="124" cy="97" r="6.5"/>
+            <path class="m-face" d="M92 118c3 4 13 4 16 0" fill="none" stroke="currentColor" style="stroke:var(--ink);stroke-width:3;stroke-linecap:round"/>
+          </g>
+          <g class="m-eyes-sad">
+            <path d="M69 100c3-5 11-5 14 0" fill="none" style="stroke:var(--ink);stroke-width:3.4;stroke-linecap:round"/>
+            <path d="M117 100c3-5 11-5 14 0" fill="none" style="stroke:var(--ink);stroke-width:3.4;stroke-linecap:round"/>
+            <path d="M92 124c3-4 13-4 16 0" fill="none" style="stroke:var(--ink);stroke-width:3;stroke-linecap:round"/>
+          </g>
+          <g class="m-tear">
+            <path d="M82 108c0 0-6 9-6 13a6 6 0 0 0 12 0c0-4-6-13-6-13z" style="fill:var(--rose);opacity:.75"/>
+          </g>
+          <g class="m-eyes-happy">
+            <path d="M69 100c3-6 11-6 14 0" fill="none" style="stroke:var(--ink);stroke-width:3.4;stroke-linecap:round"/>
+            <path d="M117 100c3-6 11-6 14 0" fill="none" style="stroke:var(--ink);stroke-width:3.4;stroke-linecap:round"/>
+            <path d="M88 118c5 8 19 8 24 0" fill="none" style="stroke:var(--ink);stroke-width:3.2;stroke-linecap:round"/>
+          </g>
+        </svg>
+        <p class="lock__hint">ipucu: <b id="hintText">—</b></p>
+      </div>
+
+      <div class="lock__pad">
+        <p class="eyebrow">şifreyi gir</p>
+        <div class="dots" id="dots" role="status" aria-live="polite" aria-label="Girilen hane sayısı">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <div class="keypad" id="keypad">
+          <button class="key" data-k="1">1</button>
+          <button class="key" data-k="2">2</button>
+          <button class="key" data-k="3">3</button>
+          <button class="key" data-k="4">4</button>
+          <button class="key" data-k="5">5</button>
+          <button class="key" data-k="6">6</button>
+          <button class="key" data-k="7">7</button>
+          <button class="key" data-k="8">8</button>
+          <button class="key" data-k="9">9</button>
+          <button class="key key--wide" data-k="del" aria-label="Sil">←</button>
+          <button class="key" data-k="0">0</button>
+          <button class="key key--wide" data-k="clr" aria-label="Temizle">×</button>
+        </div>
+        <p class="lock__msg" id="lockMsg" role="alert"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 2 · SÜRPRİZ ═══ -->
+  <section class="screen" id="s-reveal">
+    <div class="reveal">
+      <svg class="mascot is-happy" viewBox="0 0 200 210" aria-hidden="true">
+        <ellipse class="m-shade" cx="100" cy="197" rx="52" ry="8"/>
+        <path class="m-body" d="M100 14c-42 0-70 34-70 84 0 56 30 88 70 88s70-32 70-88c0-50-28-84-70-84z"/>
+        <circle class="m-blush" cx="56" cy="112" r="11"/>
+        <circle class="m-blush" cx="144" cy="112" r="11"/>
+        <g class="m-eyes-happy" style="display:block">
+          <path d="M69 100c3-6 11-6 14 0" fill="none" style="stroke:var(--ink);stroke-width:3.4;stroke-linecap:round"/>
+          <path d="M117 100c3-6 11-6 14 0" fill="none" style="stroke:var(--ink);stroke-width:3.4;stroke-linecap:round"/>
+          <path d="M88 118c5 8 19 8 24 0" fill="none" style="stroke:var(--ink);stroke-width:3.2;stroke-linecap:round"/>
+        </g>
+      </svg>
+      <h1 class="display reveal__title">doğru bildin, <em id="revealName">sen</em></h1>
+      <p class="reveal__sub">buradan sonrası tamamen senin için hazırlandı.</p>
+      <button class="btn" data-go="s-letter">aç</button>
+    </div>
+  </section>
+
+  <!-- ═══ 3 · MEKTUP ═══ -->
+  <section class="screen" id="s-letter">
+    <div style="display:grid; justify-items:center; gap:1.5rem; width:min(620px,100%)">
+      <article class="letter">
+        <svg class="bloom bloom--tl" viewBox="0 0 120 120" aria-hidden="true">
+          <path class="leaf" d="M60 66C40 74 22 96 16 118c24-4 42-22 50-44z"/>
+          <path class="leaf" d="M62 64c22 4 44 22 52 42-24 2-46-14-56-36z"/>
+          <circle class="petal" cx="60" cy="24" r="17"/>
+          <circle class="petal" cx="36" cy="44" r="15"/>
+          <circle class="petal" cx="84" cy="44" r="15"/>
+          <circle class="petal-2" cx="46" cy="66" r="13"/>
+          <circle class="petal-2" cx="74" cy="66" r="13"/>
+          <circle class="core" cx="60" cy="47" r="10"/>
+        </svg>
+        <div class="letter__inner">
+          <h2 class="letter__to" id="letterTo">Sevgili —,</h2>
+          <div id="letterBody"></div>
+          <p class="letter__sign" id="letterSign">—</p>
+        </div>
+        <svg class="bloom bloom--br" viewBox="0 0 120 120" aria-hidden="true">
+          <path class="leaf" d="M60 66C40 74 22 96 16 118c24-4 42-22 50-44z"/>
+          <path class="leaf" d="M62 64c22 4 44 22 52 42-24 2-46-14-56-36z"/>
+          <circle class="petal" cx="60" cy="24" r="17"/>
+          <circle class="petal" cx="36" cy="44" r="15"/>
+          <circle class="petal" cx="84" cy="44" r="15"/>
+          <circle class="petal-2" cx="46" cy="66" r="13"/>
+          <circle class="petal-2" cx="74" cy="66" r="13"/>
+          <circle class="core" cx="60" cy="47" r="10"/>
+        </svg>
+      </article>
+      <div class="nav">
+        <button class="btn-quiet" data-go="s-reveal">geri</button>
+        <button class="btn" data-go="s-song">devam</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 4 · ŞARKI ═══ -->
+  <section class="screen" id="s-song">
+    <div class="song">
+      <div class="frame" id="frame">
+        <div class="frame__ph">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+               style="stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round">
+            <rect x="3" y="4" width="18" height="16" rx="2.5"/>
+            <circle cx="8.5" cy="9.5" r="1.6"/>
+            <path d="M21 16l-5-5-6 6-2-2-5 5"/>
+          </svg>
+          <span>buraya fotoğrafınızı ekleyin<br>(CONFIG içindeki <b>foto</b> alanı)</span>
+        </div>
+        <div class="frame__lyrics" id="lyrics"></div>
+      </div>
+
+      <div class="player">
+        <div class="player__meta">
+          <div>
+            <p class="player__name" id="songName">—</p>
+            <p class="player__by" id="songBy">—</p>
+          </div>
+        </div>
+        <div class="track"><div class="track__fill" id="trackFill"></div></div>
+        <div class="player__row">
+          <span class="time" id="tNow">0:00</span>
+          <button class="playbtn playing" id="playBtn" aria-label="Duraklat">
+            <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+          </button>
+          <span class="time" id="tEnd">0:00</span>
+        </div>
+      </div>
+
+      <div class="nav">
+        <button class="btn-quiet" data-go="s-letter">geri</button>
+        <button class="btn" data-go="s-finale">son</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 5 · KALP ═══ -->
+  <section class="screen" id="s-finale">
+    <div class="finale">
+      <svg class="heart" viewBox="0 0 100 90" aria-hidden="true">
+        <path d="M50 88C22 68 4 51 4 30.5 4 15 16 4 30 4c8 0 15.5 4 20 10.5C54.5 8 62 4 70 4c14 0 26 11 26 26.5C96 51 78 68 50 88z"/>
+      </svg>
+      <p class="display finale__word" id="finalWord">—</p>
+      <div class="nav">
+        <button class="btn-quiet" data-go="s-song">geri</button>
+        <button class="btn-quiet" id="lockAgain">baştan kilitle</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const $  = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+
+  /* ── İçeriği yerleştir ─────────────────────────────────── */
+  $("#hintText").textContent   = CONFIG.ipucu;
+  $("#revealName").textContent = CONFIG.isim;
+  $("#letterTo").textContent   = "Sevgili " + CONFIG.isim + ",";
+  $("#letterSign").textContent = CONFIG.imza;
+  $("#songName").textContent   = CONFIG.sarkiAdi;
+  $("#songBy").textContent     = CONFIG.sanatci;
+  $("#finalWord").textContent  = CONFIG.sonSoz;
+
+  const body = $("#letterBody");
+  CONFIG.mektup.forEach(t => {
+    const p = document.createElement("p");
+    p.className = "line";
+    p.textContent = t;
+    body.appendChild(p);
+  });
+
+  const lyricsBox = $("#lyrics");
+  CONFIG.sozler.forEach(t => {
+    const p = document.createElement("p");
+    p.className = "lyric";
+    p.textContent = t;
+    lyricsBox.appendChild(p);
+  });
+
+  if (CONFIG.foto) {
+    const f = $("#frame");
+    f.style.backgroundImage = "url('" + CONFIG.foto + "')";
+    f.classList.add("has-photo");
+  }
+
+  const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+  $("#tEnd").textContent = fmt(CONFIG.sarkiSuresi);
+
+  /* ── Sahne geçişi ──────────────────────────────────────── */
+  let current = "s-lock";
+  function go(id) {
+    if (id === current) return;
+    $("#" + current).classList.remove("is-active");
+    $("#" + id).classList.add("is-active");
+    current = id;
+    window.scrollTo({ top: 0, behavior: "instant" });
+    $("#petals").classList.toggle("on", id === "s-reveal" || id === "s-finale");
+    if (id === "s-song") startSong();
+    else stopSong();
+  }
+  $$("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
+
+  /* ── Kilit ─────────────────────────────────────────────── */
+  const dots    = $$("#dots .dot");
+  const msg     = $("#lockMsg");
+  const card    = $("#lockCard");
+  const mascot  = $("#mascot");
+  let entry = "";
+  let busy  = false;
+
+  function paint() {
+    dots.forEach((d, i) => {
+      const has = i < entry.length;
+      d.classList.toggle("filled", has);
+      d.textContent = has ? "•" : "";
+    });
+  }
+
+  function press(k) {
+    if (busy) return;
+    if (k === "del") { entry = entry.slice(0, -1); msg.textContent = ""; return paint(); }
+    if (k === "clr") { entry = ""; msg.textContent = ""; return paint(); }
+    if (entry.length >= 4) return;
+    entry += k;
+    msg.textContent = "";
+    mascot.classList.remove("is-sad");
+    paint();
+    if (entry.length === 4) setTimeout(check, 260);
+  }
+
+  function check() {
+    if (entry === String(CONFIG.sifre)) {
+      busy = true;
+      msg.textContent = "";
+      mascot.classList.add("is-happy");
+      setTimeout(() => { go("s-reveal"); busy = false; }, 700);
+    } else {
+      busy = true;
+      card.classList.add("shake");
+      mascot.classList.add("is-sad");
+      msg.textContent = "o değil. bir daha dene.";
+      setTimeout(() => {
+        card.classList.remove("shake");
+        entry = "";
+        paint();
+        busy = false;
+      }, 620);
+    }
+  }
+
+  $("#keypad").addEventListener("click", e => {
+    const b = e.target.closest("[data-k]");
+    if (b) press(b.dataset.k);
+  });
+
+  document.addEventListener("keydown", e => {
+    if (current !== "s-lock") return;
+    if (/^[0-9]$/.test(e.key)) press(e.key);
+    else if (e.key === "Backspace") press("del");
+    else if (e.key === "Escape") press("clr");
+  });
+
+  $("#lockAgain").addEventListener("click", () => {
+    entry = "";
+    paint();
+    msg.textContent = "";
+    mascot.classList.remove("is-sad", "is-happy");
+    go("s-lock");
+  });
+
+  paint();
+
+  /* ── Şarkı ─────────────────────────────────────────────── */
+  const fill    = $("#trackFill");
+  const tNow    = $("#tNow");
+  const playBtn = $("#playBtn");
+  const lyrics  = $$(".lyric");
+  let t = 0, timer = null, playing = true;
+
+  function tick() {
+    if (!playing) return;
+    t = (t + .25) % CONFIG.sarkiSuresi;
+    fill.style.width = (t / CONFIG.sarkiSuresi * 100) + "%";
+    tNow.textContent = fmt(t);
+    const step = CONFIG.sarkiSuresi / (lyrics.length + 1);
+    lyrics.forEach((l, i) => l.classList.toggle("in", t > step * (i + .35)));
+  }
+  function startSong() {
+    if (timer) return;
+    timer = setInterval(tick, 250);
+  }
+  function stopSong() {
+    clearInterval(timer);
+    timer = null;
+  }
+  playBtn.addEventListener("click", () => {
+    playing = !playing;
+    playBtn.classList.toggle("playing", playing);
+    playBtn.setAttribute("aria-label", playing ? "Duraklat" : "Çal");
+  });
+
+  /* ── Yaprak yağmuru ────────────────────────────────────── */
+  const cv  = $("#petals");
+  const ctx = cv.getContext("2d");
+  const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W = 0, H = 0, drops = [];
+
+  function size() {
+    const r = Math.min(window.devicePixelRatio || 1, 2);
+    W = cv.width  = Math.floor(innerWidth  * r);
+    H = cv.height = Math.floor(innerHeight * r);
+    cv.style.width  = innerWidth + "px";
+    cv.style.height = innerHeight + "px";
+    ctx.setTransform(r, 0, 0, r, 0, 0);
+  }
+
+  function seed() {
+    const n = calm ? 0 : Math.round(innerWidth / 34);
+    drops = Array.from({ length: n }, () => ({
+      x: Math.random() * innerWidth,
+      y: Math.random() * innerHeight - innerHeight,
+      r: 4 + Math.random() * 7,
+      vy: .25 + Math.random() * .55,
+      sway: .3 + Math.random() * .8,
+      ph: Math.random() * Math.PI * 2,
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - .5) * .012,
+      a: .18 + Math.random() * .32
+    }));
+  }
+
+  function petalColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--rose").trim() || "#D4547A";
+  }
+
+  function frame() {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    const col = petalColor();
+    drops.forEach(p => {
+      p.y += p.vy;
+      p.ph += .012;
+      p.rot += p.vr;
+      p.x += Math.sin(p.ph) * p.sway;
+      if (p.y > innerHeight + 20) { p.y = -20; p.x = Math.random() * innerWidth; }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = p.a;
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.r, p.r * .58, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+    requestAnimationFrame(frame);
+  }
+
+  size(); seed();
+  addEventListener("resize", () => { size(); seed(); });
+  if (!calm) requestAnimationFrame(frame);
+})();
+</script>
